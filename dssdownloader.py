@@ -353,11 +353,11 @@ def enviar_email():
             print(e.args)
 
 
-# remove_arquivos()
-# logar()
-# acessar_dispositivos()
-# realiza_download()
-# renomeia_sheet()
+remove_arquivos()
+logar()
+acessar_dispositivos()
+realiza_download()
+renomeia_sheet()
 atualizar_disponibilidade()
 time.sleep(5)
-# enviar_email()
+enviar_email()
