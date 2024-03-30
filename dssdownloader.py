@@ -169,64 +169,87 @@ def calcula_status():
     for indice, linha in enumerate(sheet_status.iter_rows(min_row=2), 1):
         cameras_online += int(linha[37].value)
         quantidade_cameras = indice
-
     return quantidade_cameras, cameras_online
 
 
 # Atualiza o arquivo de disponibilidade
 def atualizar_disponibilidade():
     caminho_disponiblidade = os.path.join(
-        diretorio_disponibilidade, "DISPONIBILIDADE 2024.xlsx"
+        diretorio_disponibilidade, "DISPONIBILIDADE_CONTRATO.xlsx"
     )
 
-    disponibilidade = openpyxl.load_workbook(caminho_disponiblidade)
+    disponibilidade = openpyxl.load_workbook(caminho_disponiblidade,data_only=True)
 
     # definindo variáveis importante
     locale.setlocale(locale.LC_ALL, "pt_br")
     data_de_hoje = datetime.now()
     str_data_de_hoje = data_de_hoje.strftime("%Y-%m-%d 00:00:00")
     mes_numero = data_de_hoje.month
-    mes_atual = calendar.month_name[mes_numero].upper()
-    sheet_mes_atual = disponibilidade[mes_atual]
+    sheet_mes_atual = disponibilidade.active
 
-    for linha in sheet_mes_atual.iter_rows(min_row=2):
+    for linha in sheet_mes_atual.iter_rows(min_row=2):               
         data = str(linha[0].value)
-        if data == str_data_de_hoje:
+        if str_data_de_hoje == data:
+            print(linha)
+            # Preenchendo as três colunas com os dados calculado na planilha status
+            # Colunas  CAMS ONLINE | CAMS TOTAL | PERCENTAGEM DE CÂMERA ONLINE  
             if linha[1].value is None:
                 quantidade_cameras, cameras_online = calcula_status()
                 linha[1].value = cameras_online
                 linha[2].value = quantidade_cameras
+                linha[3].value = round(float(cameras_online / quantidade_cameras),4) * 100
+                linha[19].value = linha[3].value 
                 break
-
+            
+            # Colunas  CAMS ONLINE | CAMS TOTAL | PERCENTAGEM DE CÂMERA ONLINE  
             if linha[4].value is None:
                 quantidade_cameras, cameras_online = calcula_status()
                 linha[4].value = cameras_online
                 linha[5].value = quantidade_cameras
+                linha[6].value = round(float(cameras_online / quantidade_cameras),4) * 100
+                linha[19].value = round(((float(linha[3].value) + float(linha[6].value))/ 2),4)
                 break
-
+            
+            # Colunas  CAMS ONLINE | CAMS TOTAL | PERCENTAGEM DE CÂMERA ONLINE  
             if linha[7].value is None:
                 quantidade_cameras, cameras_online = calcula_status()
                 linha[7].value = cameras_online
                 linha[8].value = quantidade_cameras
+                linha[9].value = round(float(cameras_online / quantidade_cameras),4) * 100
+                linha[19].value = round(((float(linha[3].value) + float(linha[6].value) + float(linha[9].value)) / 3 ),4)
                 break
-
+            
+            # Colunas  CAMS ONLINE | CAMS TOTAL | PERCENTAGEM DE CÂMERA ONLINE  
             if linha[10].value is None:
                 quantidade_cameras, cameras_online = calcula_status()
                 linha[10].value = cameras_online
                 linha[11].value = quantidade_cameras
+                linha[12].value = round(float(cameras_online / quantidade_cameras),4) * 100
+                linha[19].value = round(((float(linha[3].value) + float(linha[6].value) + 
+                                         float(linha[9].value) + float(linha[12].value)) / 4 ),4)
                 break
-
+            
+            # Colunas  CAMS ONLINE | CAMS TOTAL | PERCENTAGEM DE CÂMERA ONLINE  
             if linha[13].value is None:
                 quantidade_cameras, cameras_online = calcula_status()
                 linha[13].value = cameras_online
                 linha[14].value = quantidade_cameras
+                linha[15].value =round(float(cameras_online / quantidade_cameras),4) * 100
+                linha[19].value = round(((float(linha[3].value) + float(linha[6].value) + float(linha[9].value) + 
+                                         float(linha[12].value) + float(linha[15].value)) / 5 ),4)
                 break
-
+            
+            # Colunas  CAMS ONLINE | CAMS TOTAL | PERCENTAGEM DE CÂMERA ONLINE 
             if linha[16].value is None:
                 quantidade_cameras, cameras_online = calcula_status()
-                linha[17].value = cameras_online
-                linha[18].value = quantidade_cameras
+                linha[16].value = cameras_online
+                linha[17].value = quantidade_cameras
+                linha[18].value =round(float(cameras_online / quantidade_cameras),4) * 100
+                linha[19].value = round(((float(linha[3].value) + float(linha[6].value) + float(linha[9].value) + 
+                                         float(linha[12].value) + float(linha[15].value) + 
+                                         float(linha[18].value))  / 6 ),4)
                 break
+    
     disponibilidade.save(caminho_disponiblidade)
 
 # Função utilizada para evitar exceção caso tenha dados nulos.
@@ -236,27 +259,20 @@ def verifica_se_vazio(media: str) -> str:
     else:
         return f"{round(float(media),2)} %"
 
-# Função para renovar os dados dos arquivos. 
-def abre_fecha_excel(filename) -> None:
-    xlApp = Dispatch("Excel.Application")
-    xlApp.Visible = False
-    xlBook = xlApp.Workbooks.Open(filename)
-    xlBook.Save()
-    xlBook.Close()
-
 # Função para enviar o e-mail
 def enviar_email():
     """Realiza o envio de um relatório após as 18:00"""
-    hora_de_corte = datetime.strptime(f"{date.today()} 18:00:00", "%Y-%m-%d %H:%M:%S")
+    
+    # Utilizada para configurar o envio de email após as 18:00
+    hora_de_corte = datetime.strptime(f"{date.today()} 18:00:00", "%Y-%m-%d %H:%M:%S") 
     hora_atual = datetime.now()
 
-    if hora_atual < hora_de_corte:
+    if hora_atual > hora_de_corte:
         lista_contatos = ["a.alves@perkons.com"]
         email = Emailer(EMAIL_ADDRESS, EMAIL_PASSWORD)
         caminho_disponiblidade = os.path.join(
             diretorio_disponibilidade, "DISPONIBILIDADE 2024.xlsx"
         )
-        abre_fecha_excel(caminho_disponiblidade)
         disponibilidade = openpyxl.load_workbook(caminho_disponiblidade, data_only=True)
         locale.setlocale(locale.LC_ALL, "pt_br")
         data_de_hoje = datetime.now()
@@ -269,7 +285,6 @@ def enviar_email():
         for linha in sheet_mes_atual.iter_rows(min_row=2, values_only=True):
             data = str(linha[0])
             if data == str_data_de_hoje:
-                print(linha)
                 mensagem = f"""
                  <style>
                     table {{
@@ -325,6 +340,9 @@ def enviar_email():
         except Exception as e:
             print(e.args)
     else:
+        # envio de mensagem para motirar se foi realizada corretamente.
+        email = Emailer(EMAIL_ADDRESS, EMAIL_PASSWORD)
+        lista_contatos = ["a.alves@perkons.com"]
         email.definir_conteudo(topico=f"Relatório de Disponibilidade executado com sucesso ",
                            email_remetente="andre@andrealves.eng.br",
                            lista_contatos=lista_contatos,
@@ -340,6 +358,6 @@ def enviar_email():
 # acessar_dispositivos()
 # realiza_download()
 # renomeia_sheet()
-# atualizar_disponibilidade()
-# time.sleep(5)
-enviar_email()
+atualizar_disponibilidade()
+time.sleep(5)
+# enviar_email()
