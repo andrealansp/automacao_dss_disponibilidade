@@ -5,7 +5,7 @@ import sys
 import time
 from datetime import datetime, date
 from typing import List
-from win32com.client import Dispatch
+import requests
 
 import openpyxl
 from selenium import webdriver
@@ -186,40 +186,59 @@ def atualizar_disponibilidade():
     str_data_de_hoje = data_de_hoje.strftime("%Y-%m-%d 00:00:00")
     mes_numero = data_de_hoje.month
     sheet_mes_atual = disponibilidade.active
+    contatos = [("5527996424461", "2026160"), ("5527997183102", "7796020")]
 
     for linha in sheet_mes_atual.iter_rows(min_row=2):               
         data = str(linha[0].value)
         if str_data_de_hoje == data:
             print(linha)
             # Preenchendo as três colunas com os dados calculado na planilha status
-            # Colunas  CAMS ONLINE | CAMS TOTAL | PERCENTAGEM DE CÂMERA ONLINE  
+            # Colunas  CAMS ONLINE | CAMS TOTAL | PERCENTAGEM DE CÂMERA ONLINE
             if linha[1].value is None:
                 quantidade_cameras, cameras_online = calcula_status()
                 linha[1].value = cameras_online
                 linha[2].value = quantidade_cameras
                 linha[3].value = round(float(cameras_online / quantidade_cameras),4) * 100
                 linha[19].value = linha[3].value 
+                for contato in contatos:
+                    enviar_mensagem_whatsapp(
+                        contato[0],
+                        contato[1],
+                        f"{cameras_online} / {quantidade_cameras} disponibilidade - {linha[19].value}%",
+                    )
                 break
-            
-            # Colunas  CAMS ONLINE | CAMS TOTAL | PERCENTAGEM DE CÂMERA ONLINE  
+
+            # Colunas  CAMS ONLINE | CAMS TOTAL | PERCENTAGEM DE CÂMERA ONLINE
             if linha[4].value is None:
                 quantidade_cameras, cameras_online = calcula_status()
                 linha[4].value = cameras_online
                 linha[5].value = quantidade_cameras
                 linha[6].value = round(float(cameras_online / quantidade_cameras),4) * 100
                 linha[19].value = round(((float(linha[3].value) + float(linha[6].value))/ 2),4)
+                for contato in contatos:
+                    enviar_mensagem_whatsapp(
+                        contato[0],
+                        contato[1],
+                        f"{cameras_online} / {quantidade_cameras} disponibilidade - {linha[19].value}%",
+                    )
                 break
-            
-            # Colunas  CAMS ONLINE | CAMS TOTAL | PERCENTAGEM DE CÂMERA ONLINE  
+
+            # Colunas  CAMS ONLINE | CAMS TOTAL | PERCENTAGEM DE CÂMERA ONLINE
             if linha[7].value is None:
                 quantidade_cameras, cameras_online = calcula_status()
                 linha[7].value = cameras_online
                 linha[8].value = quantidade_cameras
                 linha[9].value = round(float(cameras_online / quantidade_cameras),4) * 100
                 linha[19].value = round(((float(linha[3].value) + float(linha[6].value) + float(linha[9].value)) / 3 ),4)
+                for contato in contatos:
+                    enviar_mensagem_whatsapp(
+                        contato[0],
+                        contato[1],
+                        f"{cameras_online} / {quantidade_cameras} disponibilidade - {linha[19].value}%",
+                    )
                 break
-            
-            # Colunas  CAMS ONLINE | CAMS TOTAL | PERCENTAGEM DE CÂMERA ONLINE  
+
+            # Colunas  CAMS ONLINE | CAMS TOTAL | PERCENTAGEM DE CÂMERA ONLINE
             if linha[10].value is None:
                 quantidade_cameras, cameras_online = calcula_status()
                 linha[10].value = cameras_online
@@ -227,9 +246,15 @@ def atualizar_disponibilidade():
                 linha[12].value = round(float(cameras_online / quantidade_cameras),4) * 100
                 linha[19].value = round(((float(linha[3].value) + float(linha[6].value) + 
                                          float(linha[9].value) + float(linha[12].value)) / 4 ),4)
+                for contato in contatos:
+                    enviar_mensagem_whatsapp(
+                        contato[0],
+                        contato[1],
+                        f"{cameras_online} / {quantidade_cameras} disponibilidade - {linha[19].value}%",
+                    )
                 break
-            
-            # Colunas  CAMS ONLINE | CAMS TOTAL | PERCENTAGEM DE CÂMERA ONLINE  
+
+            # Colunas  CAMS ONLINE | CAMS TOTAL | PERCENTAGEM DE CÂMERA ONLINE
             if linha[13].value is None:
                 quantidade_cameras, cameras_online = calcula_status()
                 linha[13].value = cameras_online
@@ -237,9 +262,15 @@ def atualizar_disponibilidade():
                 linha[15].value =round(float(cameras_online / quantidade_cameras),4) * 100
                 linha[19].value = round(((float(linha[3].value) + float(linha[6].value) + float(linha[9].value) + 
                                          float(linha[12].value) + float(linha[15].value)) / 5 ),4)
+                for contato in contatos:
+                    enviar_mensagem_whatsapp(
+                        contato[0],
+                        contato[1],
+                        f"{cameras_online} / {quantidade_cameras} disponibilidade - {linha[19].value}%",
+                    )
                 break
-            
-            # Colunas  CAMS ONLINE | CAMS TOTAL | PERCENTAGEM DE CÂMERA ONLINE 
+
+            # Colunas  CAMS ONLINE | CAMS TOTAL | PERCENTAGEM DE CÂMERA ONLINE
             if linha[16].value is None:
                 quantidade_cameras, cameras_online = calcula_status()
                 linha[16].value = cameras_online
@@ -248,109 +279,27 @@ def atualizar_disponibilidade():
                 linha[19].value = round(((float(linha[3].value) + float(linha[6].value) + float(linha[9].value) + 
                                          float(linha[12].value) + float(linha[15].value) + 
                                          float(linha[18].value))  / 6 ),4)
+                for contato in contatos:
+                    enviar_mensagem_whatsapp(
+                        contato[0],
+                        contato[1],
+                        f"{cameras_online} / {quantidade_cameras} disponibilidade - {linha[19].value}%",
+                    )
                 break
-    
+
     disponibilidade.save(caminho_disponiblidade)
 
 # Função utilizada para evitar exceção caso tenha dados nulos.
-def verifica_se_vazio(media: str) -> str:
-    if media is None:
-        return "0 %"
-    else:
-        return f"{round(float(media),2)} %"
 
-# Função para enviar o e-mail
-def enviar_email():
-    """Realiza o envio de um relatório após as 18:00"""
-    
-    # Utilizada para configurar o envio de email após as 18:00
-    hora_de_corte = datetime.strptime(f"{date.today()} 18:00:00", "%Y-%m-%d %H:%M:%S") 
-    hora_atual = datetime.now()
 
-    if hora_atual > hora_de_corte:
-        lista_contatos = ["a.alves@perkons.com"]
-        email = Emailer(EMAIL_ADDRESS, EMAIL_PASSWORD)
-        caminho_disponiblidade = os.path.join(
-            diretorio_disponibilidade, "DISPONIBILIDADE 2024.xlsx"
-        )
-        disponibilidade = openpyxl.load_workbook(caminho_disponiblidade, data_only=True)
-        locale.setlocale(locale.LC_ALL, "pt_br")
-        data_de_hoje = datetime.now()
-        str_data_de_hoje = data_de_hoje.strftime("%Y-%m-%d 00:00:00")
-        mes_numero = data_de_hoje.month
-        mes_atual = calendar.month_name[mes_numero].upper()
-        sheet_mes_atual = disponibilidade[mes_atual]
-        mensagem = ""
+def enviar_mensagem_whatsapp(telefone: str, apikey: str, mensagem: str) -> None:
+    payload = {"phone": telefone, "apikey": apikey, "text": mensagem}
 
-        for linha in sheet_mes_atual.iter_rows(min_row=2, values_only=True):
-            data = str(linha[0])
-            if data == str_data_de_hoje:
-                mensagem = f"""
-                 <style>
-                    table {{
-                    width: 100%;
-                    font-size: 10px;
-                    border: 1px gray solid;
-                    }}
-                    th,
-                    td {{
-                    border: 1px black solid;
-                    height: 50px;
-                    text-align: center;
-                    }}
-                    .content {{
-                        padding: 5px;
-                        border-radius: 10px;
-                        background-color: lightgray;
-                        text-align:center;
-                    }}
-                 </style>
-                <div class="content">
-                <h1 text-align="center"> Relatório de Disponibilidade DETRAN-ES <h1>
-                <table>
-                    <thead>
-                        <th> Amostra 1</th>
-                        <th>Amostra 2</th>
-                        <th>Amostra 3</th>
-                        <th> Amostra 4</th>
-                        <th>Amostra 5</th>
-                        <th>Amostra 6</th>
-                        <th>Média do Dia</th>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>{linha[1]} / {linha[2]} / {verifica_se_vazio(linha[3])}</td>
-                            <td>{linha[4]} / {linha[5]} / {verifica_se_vazio(linha[6])}</td>
-                            <td>{linha[7]} / {linha[8]} / {verifica_se_vazio(linha[9])}</td>
-                            <td>{linha[10]} / {linha[11]} / {verifica_se_vazio(linha[12])}</td>
-                            <td>{linha[13]} / {linha[14]} / {verifica_se_vazio(linha[15])}</td>
-                            <td>{linha[16]} / {linha[17]} / {verifica_se_vazio(linha[18])}</td>
-                            <td>{verifica_se_vazio(linha[19])}</td>                    
-                        </tr>
-                    </tbody>
-                    </table>
-                    </div>
-                """
-        email.definir_conteudo(topico=f"Relatório de Disponibilidade {date.today().strftime("%d/%m/%y")} ",
-                           email_remetente="andre@andrealves.eng.br",
-                           lista_contatos=lista_contatos,
-                           conteudo_email=mensagem)
-        try:
-            email.enviar_email(intervalo_em_segundos=5)
-        except Exception as e:
-            print(e.args)
-    else:
-        # envio de mensagem para motirar se foi realizada corretamente.
-        email = Emailer(EMAIL_ADDRESS, EMAIL_PASSWORD)
-        lista_contatos = ["a.alves@perkons.com"]
-        email.definir_conteudo(topico=f"Relatório de Disponibilidade executado com sucesso ",
-                           email_remetente="andre@andrealves.eng.br",
-                           lista_contatos=lista_contatos,
-                           conteudo_email="Executado com sucesso !")
-        try:
-            email.enviar_email(intervalo_em_segundos=5)
-        except Exception as e:
-            print(e.args)
+    url = "https://api.callmebot.com/whatsapp.php"
+
+    response = requests.get(url=url, params=payload)
+    print(response.url)
+    print(response.status_code)
 
 
 remove_arquivos()
@@ -359,5 +308,3 @@ acessar_dispositivos()
 realiza_download()
 renomeia_sheet()
 atualizar_disponibilidade()
-time.sleep(5)
-enviar_email()
