@@ -186,14 +186,17 @@ def atualizar_disponibilidade():
     str_data_de_hoje = data_de_hoje.strftime("%Y-%m-%d 00:00:00")
     mes_numero = data_de_hoje.month
     sheet_mes_atual = disponibilidade.active
-    contatos = [("5527996424461", "2026160"), ("5527997183102", "7796020")]
+    contatos = [
+        ("5527996424461", "2026160"),
+        ("5527997183102", "7796020"),
+        ("5527998202995", "5628936"),
+    ]
 
     for linha in sheet_mes_atual.iter_rows(min_row=2):               
         data = str(linha[0].value)
         if str_data_de_hoje == data:
-            print(linha)
             # Preenchendo as três colunas com os dados calculado na planilha status
-            # Colunas  CAMS ONLINE | CAMS TOTAL | PERCENTAGEM DE CÂMERA ONLINE
+            # AMOSTRA1 CAMS ONLINE | CAMS TOTAL | PERCENTAGEM DE CÂMERA ONLINE
             if linha[1].value is None:
                 quantidade_cameras, cameras_online = calcula_status()
                 linha[1].value = cameras_online
@@ -204,11 +207,11 @@ def atualizar_disponibilidade():
                     enviar_mensagem_whatsapp(
                         contato[0],
                         contato[1],
-                        f"{cameras_online} / {quantidade_cameras} disponibilidade - {linha[19].value}%",
+                        f"""{data_de_hoje.strftime("%d/%m/%y - %H:%M")} - {cameras_online} / {quantidade_cameras} disponibilidade - {linha[19].value}%""",
                     )
                 break
 
-            # Colunas  CAMS ONLINE | CAMS TOTAL | PERCENTAGEM DE CÂMERA ONLINE
+            # AMOSTRA2  CAMS ONLINE | CAMS TOTAL | PERCENTAGEM DE CÂMERA ONLINE
             if linha[4].value is None:
                 quantidade_cameras, cameras_online = calcula_status()
                 linha[4].value = cameras_online
@@ -219,11 +222,11 @@ def atualizar_disponibilidade():
                     enviar_mensagem_whatsapp(
                         contato[0],
                         contato[1],
-                        f"{cameras_online} / {quantidade_cameras} disponibilidade - {linha[19].value}%",
+                        f"""{data_de_hoje.strftime("%d/%m/%y - %H:%M")} - {cameras_online} / {quantidade_cameras} disponibilidade - {linha[19].value}%""",
                     )
                 break
 
-            # Colunas  CAMS ONLINE | CAMS TOTAL | PERCENTAGEM DE CÂMERA ONLINE
+            # AMOSTRA3  CAMS ONLINE | CAMS TOTAL | PERCENTAGEM DE CÂMERA ONLINE
             if linha[7].value is None:
                 quantidade_cameras, cameras_online = calcula_status()
                 linha[7].value = cameras_online
@@ -234,11 +237,11 @@ def atualizar_disponibilidade():
                     enviar_mensagem_whatsapp(
                         contato[0],
                         contato[1],
-                        f"{cameras_online} / {quantidade_cameras} disponibilidade - {linha[19].value}%",
+                        f"""{data_de_hoje.strftime("%d/%m/%y - %H:%M")} - {cameras_online} / {quantidade_cameras} disponibilidade - {linha[19].value}%""",
                     )
                 break
 
-            # Colunas  CAMS ONLINE | CAMS TOTAL | PERCENTAGEM DE CÂMERA ONLINE
+            # AMOSTRA4  CAMS ONLINE | CAMS TOTAL | PERCENTAGEM DE CÂMERA ONLINE
             if linha[10].value is None:
                 quantidade_cameras, cameras_online = calcula_status()
                 linha[10].value = cameras_online
@@ -250,11 +253,11 @@ def atualizar_disponibilidade():
                     enviar_mensagem_whatsapp(
                         contato[0],
                         contato[1],
-                        f"{cameras_online} / {quantidade_cameras} disponibilidade - {linha[19].value}%",
+                        f"""{data_de_hoje.strftime("%d/%m/%y - %H:%M")} - {cameras_online} / {quantidade_cameras} disponibilidade - {linha[19].value}%""",
                     )
                 break
 
-            # Colunas  CAMS ONLINE | CAMS TOTAL | PERCENTAGEM DE CÂMERA ONLINE
+            # AMOSTRA5  CAMS ONLINE | CAMS TOTAL | PERCENTAGEM DE CÂMERA ONLINE
             if linha[13].value is None:
                 quantidade_cameras, cameras_online = calcula_status()
                 linha[13].value = cameras_online
@@ -266,11 +269,11 @@ def atualizar_disponibilidade():
                     enviar_mensagem_whatsapp(
                         contato[0],
                         contato[1],
-                        f"{cameras_online} / {quantidade_cameras} disponibilidade - {linha[19].value}%",
+                        f"""{data_de_hoje.strftime("%d/%m/%y - %H:%M")} - {cameras_online} / {quantidade_cameras} disponibilidade - {linha[19].value}%""",
                     )
                 break
 
-            # Colunas  CAMS ONLINE | CAMS TOTAL | PERCENTAGEM DE CÂMERA ONLINE
+            # AMOSTRA6  CAMS ONLINE | CAMS TOTAL | PERCENTAGEM DE CÂMERA ONLINE
             if linha[16].value is None:
                 quantidade_cameras, cameras_online = calcula_status()
                 linha[16].value = cameras_online
@@ -283,14 +286,11 @@ def atualizar_disponibilidade():
                     enviar_mensagem_whatsapp(
                         contato[0],
                         contato[1],
-                        f"{cameras_online} / {quantidade_cameras} disponibilidade - {linha[19].value}%",
+                        f"""{data_de_hoje.strftime("%d/%m/%y - %H:%M")} - {cameras_online} / {quantidade_cameras} disponibilidade - {linha[19].value}%""",
                     )
                 break
 
     disponibilidade.save(caminho_disponiblidade)
-
-# Função utilizada para evitar exceção caso tenha dados nulos.
-
 
 def enviar_mensagem_whatsapp(telefone: str, apikey: str, mensagem: str) -> None:
     payload = {"phone": telefone, "apikey": apikey, "text": mensagem}
@@ -298,7 +298,6 @@ def enviar_mensagem_whatsapp(telefone: str, apikey: str, mensagem: str) -> None:
     url = "https://api.callmebot.com/whatsapp.php"
 
     response = requests.get(url=url, params=payload)
-    print(response.url)
     print(response.status_code)
 
 
